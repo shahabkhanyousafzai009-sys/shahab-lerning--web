@@ -1,10 +1,16 @@
 import { signIn } from "@/lib/auth";
 import { getCurrentUser } from "@/lib/dal";
 import { redirect } from "next/navigation";
+import Link from "next/link";
+import { LoginForm } from "@/components/LoginForm";
 
-export default async function LoginPage() {
+export default async function LoginPage(props: { searchParams?: Promise<{ error?: string; registered?: string }> }) {
   const user = await getCurrentUser();
   if (user) redirect("/dashboard");
+
+  const searchParams = await props.searchParams;
+  const error = searchParams?.error;
+  const registered = searchParams?.registered;
 
   return (
     <div className="flex min-h-[calc(100vh-8rem)] items-center justify-center px-4">
@@ -23,7 +29,30 @@ export default async function LoginPage() {
             </p>
           </div>
 
-          <div className="mt-8 space-y-3">
+          {registered && (
+            <p className="mt-4 rounded-lg bg-green-50 px-4 py-2 text-sm text-green-700 dark:bg-green-900/30 dark:text-green-400">
+              Account created! Sign in below.
+            </p>
+          )}
+
+          {error === "OAuthAccountNotLinked" && (
+            <p className="mt-4 rounded-lg bg-amber-50 px-4 py-2 text-sm text-amber-700 dark:bg-amber-900/30 dark:text-amber-400">
+              This email is already linked to another sign-in method. Try a different one.
+            </p>
+          )}
+
+          <LoginForm />
+
+          <div className="relative my-6">
+            <div className="absolute inset-0 flex items-center">
+              <div className="w-full border-t border-zinc-200 dark:border-zinc-700" />
+            </div>
+            <div className="relative flex justify-center text-sm">
+              <span className="bg-white px-3 text-zinc-400 dark:bg-zinc-900 dark:text-zinc-500">or continue with</span>
+            </div>
+          </div>
+
+          <div className="space-y-3">
             <form
               action={async () => {
                 "use server";
@@ -62,8 +91,11 @@ export default async function LoginPage() {
             </form>
           </div>
 
-          <p className="mt-6 text-center text-xs text-zinc-400 dark:text-zinc-500">
-            By signing in, you agree to our terms of service.
+          <p className="mt-6 text-center text-sm text-zinc-500 dark:text-zinc-400">
+            Don&apos;t have an account?{" "}
+            <Link href="/register" className="font-medium text-indigo-600 hover:text-indigo-500 dark:text-indigo-400">
+              Sign up
+            </Link>
           </p>
         </div>
       </div>

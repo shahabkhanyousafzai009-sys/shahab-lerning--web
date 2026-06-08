@@ -29,17 +29,18 @@ function ProgressRing({ percent, size = 80, strokeWidth = 6 }: { percent: number
   );
 }
 
+const barColors = ["from-indigo-500 to-violet-500", "from-emerald-500 to-teal-500", "from-orange-500 to-rose-500", "from-sky-500 to-cyan-500", "from-purple-500 to-pink-500"];
+
 export default async function DashboardPage() {
   const user = await getCurrentUser();
   if (!user) redirect("/login");
 
   const data = await getDashboardData(user.id);
-  const { completedCount, totalQuizScore, totalQuizCount, totalLessons, overallPercent, lessonsByCourse, activeCourses, recentActivity } = data;
+  const { completedCount, totalQuizScore, totalQuizCount, totalLessons, overallPercent, lessonsByCourse, activeCourses, recentActivity, avgQuizScore, quizHighScore, streak, badges } = data;
 
   return (
     <div className="mx-auto max-w-5xl px-4 py-12 sm:py-16">
-      {/* Welcome Section */}
-      <div className="animate-fade-in flex items-start gap-6 rounded-2xl border border-zinc-200/60 bg-white p-6 shadow-sm dark:border-zinc-700/60 dark:bg-zinc-900 sm:p-8">
+      <div className="animate-fade-in flex items-start gap-6 rounded-2xl border border-zinc-200/60 bg-white p-6 shadow-sm dark:border-zinc-700/60 dark:bg-zinc-900 sm:p-8 hover-lift">
         <div className="shrink-0">
           {user.image ? (
             <img src={user.image} alt="" className="size-16 rounded-2xl ring-2 ring-zinc-200 dark:ring-zinc-700" />
@@ -54,90 +55,112 @@ export default async function DashboardPage() {
             Welcome back, {user.name || "Learner"}
           </h1>
           <p className="mt-1 text-sm text-zinc-500 dark:text-zinc-400">
-            {completedCount === totalLessons
+            {completedCount === totalLessons && totalLessons > 0
               ? "You completed everything! Amazing."
               : `Keep learning — you have ${totalLessons - completedCount} lessons remaining.`}
           </p>
+          {streak > 0 && (
+            <p className="mt-1 inline-flex items-center gap-1 rounded-full bg-orange-50 px-2.5 py-0.5 text-xs font-medium text-orange-600 dark:bg-orange-900/30 dark:text-orange-400">
+              <span>🔥</span> {streak} day streak
+            </p>
+          )}
         </div>
         <div className="hidden shrink-0 sm:block">
           <ProgressRing percent={overallPercent} size={88} strokeWidth={7} />
         </div>
       </div>
 
-      {/* Stats Grid */}
       <div className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        <div className="animate-fade-in rounded-2xl border border-zinc-200/60 bg-white p-5 shadow-sm dark:border-zinc-700/60 dark:bg-zinc-900">
+        <div className="glass-card rounded-2xl p-5 animate-slide-up animate-delay-100 stat-card">
           <div className="flex items-center gap-4">
             <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-indigo-500 to-violet-500 text-white shadow-sm">
               <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
               </svg>
             </div>
-            <div>
+            <div className="min-w-0 flex-1">
               <div className="text-2xl font-bold text-zinc-900 dark:text-zinc-100">{completedCount}</div>
               <div className="text-xs text-zinc-500 dark:text-zinc-400">Lessons Done</div>
-              <div className="mt-1 h-1.5 overflow-hidden rounded-full bg-zinc-100 dark:bg-zinc-800">
-                <div className="h-full rounded-full bg-gradient-to-r from-indigo-500 to-violet-500 transition-all" style={{ width: `${totalLessons > 0 ? (completedCount / totalLessons) * 100 : 0}%` }} />
+              <div className="mt-1.5 h-1.5 overflow-hidden rounded-full bg-zinc-100 dark:bg-zinc-800">
+                <div className="h-full rounded-full bg-gradient-to-r from-indigo-500 to-violet-500 transition-all duration-700" style={{ width: `${totalLessons > 0 ? (completedCount / totalLessons) * 100 : 0}%` }} />
               </div>
             </div>
           </div>
         </div>
 
-        <div className="animate-fade-in rounded-2xl border border-zinc-200/60 bg-white p-5 shadow-sm dark:border-zinc-700/60 dark:bg-zinc-900" style={{ animationDelay: "0.05s" }}>
+        <div className="glass-card rounded-2xl p-5 animate-slide-up animate-delay-200 stat-card">
           <div className="flex items-center gap-4">
             <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-emerald-500 to-teal-500 text-white shadow-sm">
               <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5" />
               </svg>
             </div>
-            <div>
+            <div className="min-w-0 flex-1">
               <div className="text-2xl font-bold text-zinc-900 dark:text-zinc-100">{totalQuizScore}</div>
               <div className="text-xs text-zinc-500 dark:text-zinc-400">Quiz Points</div>
-              <div className="mt-1 text-[11px] text-zinc-400 dark:text-zinc-500">
-                {totalQuizCount} quiz{totalQuizCount !== 1 ? "zes" : ""} attempted
-              </div>
+              <div className="mt-0.5 text-[11px] text-zinc-400">{totalQuizCount} quiz{totalQuizCount !== 1 ? "zes" : ""} attempted</div>
             </div>
           </div>
         </div>
 
-        <div className="animate-fade-in rounded-2xl border border-zinc-200/60 bg-white p-5 shadow-sm dark:border-zinc-700/60 dark:bg-zinc-900" style={{ animationDelay: "0.1s" }}>
+        <div className="glass-card rounded-2xl p-5 animate-slide-up animate-delay-300 stat-card">
           <div className="flex items-center gap-4">
             <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-orange-500 to-rose-500 text-white shadow-sm">
               <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" d="M12 6.042A8.967 8.967 0 006 3.75c-1.052 0-2.062.18-3 .512v14.25A8.987 8.987 0 016 18c2.305 0 4.408.867 6 2.292m0-14.25a8.966 8.966 0 016-2.292c1.052 0 2.062.18 3 .512v14.25A8.987 8.987 0 0018 18a8.967 8.967 0 00-6 2.292m0-14.25v14.25" />
               </svg>
             </div>
-            <div>
+            <div className="min-w-0 flex-1">
               <div className="text-2xl font-bold text-zinc-900 dark:text-zinc-100">{activeCourses}</div>
               <div className="text-xs text-zinc-500 dark:text-zinc-400">Active Courses</div>
-              <div className="mt-1 text-[11px] text-zinc-400 dark:text-zinc-500">
+              <div className="mt-0.5 text-[11px] text-zinc-400">
                 {Object.values(lessonsByCourse).filter((c: Record<string, unknown>) => (c as { completedCount: number }).completedCount === (c as { totalLessons: number }).totalLessons).length} completed
               </div>
             </div>
           </div>
         </div>
 
-        <div className="animate-fade-in rounded-2xl border border-zinc-200/60 bg-white p-5 shadow-sm dark:border-zinc-700/60 dark:bg-zinc-900" style={{ animationDelay: "0.15s" }}>
+        <div className="glass-card rounded-2xl p-5 animate-slide-up animate-delay-400 stat-card">
           <div className="flex items-center gap-4">
             <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-sky-500 to-cyan-500 text-white shadow-sm">
               <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" d="M3 13.125C3 12.504 3.504 12 4.125 12h2.25c.621 0 1.125.504 1.125 1.125v6.75C7.5 20.496 6.996 21 6.375 21h-2.25A1.125 1.125 0 013 19.875v-6.75zM9.75 8.625c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125v11.25c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V8.625zM16.5 4.125c0-.621.504-1.125 1.125-1.125h2.25C20.496 3 21 3.504 21 4.125v15.75c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V4.125z" />
               </svg>
             </div>
-            <div>
+            <div className="min-w-0 flex-1">
               <div className="text-2xl font-bold text-zinc-900 dark:text-zinc-100">{overallPercent}%</div>
               <div className="text-xs text-zinc-500 dark:text-zinc-400">Overall Progress</div>
-              <div className="mt-1 h-1.5 overflow-hidden rounded-full bg-zinc-100 dark:bg-zinc-800">
-                <div className="h-full rounded-full bg-gradient-to-r from-sky-500 to-cyan-500 transition-all" style={{ width: `${overallPercent}%` }} />
+              <div className="mt-1.5 h-1.5 overflow-hidden rounded-full bg-zinc-100 dark:bg-zinc-800">
+                <div className="h-full rounded-full bg-gradient-to-r from-sky-500 to-cyan-500 transition-all duration-700" style={{ width: `${overallPercent}%` }} />
               </div>
             </div>
           </div>
         </div>
       </div>
 
-      {/* Course Progress Sections */}
+      {badges.length > 0 && (
+        <div className="mt-8 animate-slide-up animate-delay-200">
+          <div className="glass-card rounded-2xl p-5">
+            <h2 className="text-sm font-semibold text-zinc-900 dark:text-zinc-100">Achievements</h2>
+            <div className="mt-3 flex flex-wrap gap-2">
+              {badges.slice(0, 5).map((ub) => (
+                <div key={ub.id} className="inline-flex items-center gap-1.5 rounded-full bg-zinc-50 px-3 py-1.5 text-xs font-medium text-zinc-700 dark:bg-zinc-800 dark:text-zinc-300">
+                  <span>{ub.badge.icon}</span>
+                  {ub.badge.name}
+                </div>
+              ))}
+              {badges.length > 5 && (
+                <span className="inline-flex items-center rounded-full bg-zinc-50 px-3 py-1.5 text-xs font-medium text-zinc-500 dark:bg-zinc-800 dark:text-zinc-400">
+                  +{badges.length - 5}
+                </span>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
+
       {Object.entries(lessonsByCourse).length > 0 ? (
-        <div className="mt-12 grid gap-8">
+        <div className="mt-10 grid gap-8">
           {Object.entries(lessonsByCourse).map(([, course], ci) => {
             const c = course as Record<string, unknown>;
             const completed = c.completedCount as number;
@@ -145,10 +168,11 @@ export default async function DashboardPage() {
             const percent = c.percent as number;
 
             return (
-              <section key={c.courseSlug as string} className="animate-fade-in" style={{ animationDelay: `${ci * 0.1}s` }}>
+              <section key={c.courseSlug as string} className="animate-slide-up" style={{ animationDelay: `${ci * 0.1 + 0.3}s` }}>
                 <div className="mb-4 flex items-center justify-between">
                   <div className="min-w-0 flex-1">
                     <div className="flex items-center gap-3">
+                      <div className={`h-2 w-2 rounded-full bg-gradient-to-r ${barColors[ci % barColors.length]}`} />
                       <h2 className="text-lg font-semibold text-zinc-900 dark:text-zinc-100">{c.courseTitle as string}</h2>
                       <span className="shrink-0 rounded-full bg-zinc-100 px-2.5 py-0.5 text-xs font-medium text-zinc-600 dark:bg-zinc-800 dark:text-zinc-400">
                         {completed}/{total}
@@ -156,7 +180,7 @@ export default async function DashboardPage() {
                     </div>
                     <div className="mt-2 h-2 overflow-hidden rounded-full bg-zinc-100 dark:bg-zinc-800">
                       <div
-                        className="h-full rounded-full bg-gradient-to-r from-indigo-500 to-violet-500 transition-all duration-700"
+                        className={`h-full rounded-full bg-gradient-to-r ${barColors[ci % barColors.length]} transition-all duration-700`}
                         style={{ width: `${percent}%` }}
                       />
                     </div>
@@ -248,9 +272,20 @@ export default async function DashboardPage() {
         </div>
       )}
 
-      {/* Recent Activity */}
+      <div className="mt-10 flex flex-wrap gap-3">
+        <Link
+          href="/performance"
+          className="inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-indigo-600 to-violet-500 px-5 py-2.5 text-sm font-medium text-white shadow-sm transition-all hover:shadow-md hover:brightness-110"
+        >
+          <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" strokeWidth="2" stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" d="M3 13.125C3 12.504 3.504 12 4.125 12h2.25c.621 0 1.125.504 1.125 1.125v6.75C7.5 20.496 6.996 21 6.375 21h-2.25A1.125 1.125 0 013 19.875v-6.75zM9.75 8.625c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125v11.25c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V8.625zM16.5 4.125c0-.621.504-1.125 1.125-1.125h2.25C20.496 3 21 3.504 21 4.125v15.75c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V4.125z" />
+          </svg>
+          Performance Report
+        </Link>
+      </div>
+
       {recentActivity.length > 0 && (
-        <section className="mt-14 animate-fade-in">
+        <section className="mt-10 animate-slide-up" style={{ animationDelay: "0.5s" }}>
           <h2 className="text-lg font-semibold text-zinc-900 dark:text-zinc-100">Recent Activity</h2>
           <div className="mt-4 space-y-2">
             {recentActivity.map((a) => (

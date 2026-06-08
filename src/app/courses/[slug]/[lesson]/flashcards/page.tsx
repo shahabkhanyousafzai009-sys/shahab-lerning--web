@@ -41,7 +41,7 @@ export default async function FlashcardsPage({
         </p>
       </div>
 
-      <FlashcardClient flashcards={flashcards} />
+      <FlashcardClient flashcards={flashcards} lessonId={lesson.id} />
     </div>
   );
 }
