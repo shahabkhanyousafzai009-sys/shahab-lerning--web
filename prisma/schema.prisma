@@ -1,0 +1,124 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "sqlite"
+}
+
+model Account {
+  id                String  @id @default(cuid())
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String? @default("")
+  access_token      String? @default("")
+  expires_at        Int?
+  token_type        String? @default("")
+  scope             String? @default("")
+  id_token          String? @default("")
+  session_state     String? @default("")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model User {
+  id            String    @id @default(cuid())
+  name          String?
+  email         String?   @unique
+  emailVerified DateTime?
+  image         String?
+  accounts      Account[]
+  sessions      Session[]
+  progress      UserProgress[]
+}
+
+model VerificationToken {
+  identifier String
+  token      String   @unique
+  expires    DateTime
+
+  @@unique([identifier, token])
+}
+
+model Course {
+  id          String   @id @default(cuid())
+  title       String
+  slug        String   @unique
+  description String
+  image       String   @default("/course-placeholder.svg")
+  published   Boolean  @default(true)
+  order       Int      @default(0)
+  lessons     Lesson[]
+  videoSessions VideoSession[]
+}
+
+model Lesson {
+  id          String   @id @default(cuid())
+  courseId    String
+  title       String
+  slug        String
+  description String   @default("")
+  order       Int      @default(0)
+  contentPath String
+  course      Course   @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  flashcards  Flashcard[]
+  quizQuestions QuizQuestion[]
+  progress    UserProgress[]
+
+  @@unique([courseId, slug])
+}
+
+model Flashcard {
+  id       String @id @default(cuid())
+  lessonId String
+  question String
+  answer   String
+  lesson   Lesson @relation(fields: [lessonId], references: [id], onDelete: Cascade)
+}
+
+model QuizQuestion {
+  id            String @id @default(cuid())
+  lessonId      String
+  question      String
+  options       String
+  correctAnswer String
+  lesson        Lesson @relation(fields: [lessonId], references: [id], onDelete: Cascade)
+}
+
+model VideoSession {
+  id       String @id @default(cuid())
+  courseId String
+  title    String
+  videoUrl String
+  order    Int    @default(0)
+  course   Course @relation(fields: [courseId], references: [id], onDelete: Cascade)
+
+  @@unique([courseId, order])
+}
+
+model UserProgress {
+  id              String   @id @default(cuid())
+  userId          String
+  lessonId        String
+  completed       Boolean  @default(false)
+  quizScore       Int      @default(0)
+  flashcardMastery Int     @default(0)
+  updatedAt       DateTime @updatedAt
+  user            User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  lesson          Lesson   @relation(fields: [lessonId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, lessonId])
+}
