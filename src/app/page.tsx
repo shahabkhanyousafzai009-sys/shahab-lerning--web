@@ -1,58 +1,149 @@
 import Link from "next/link";
 import { getAllCourses } from "@/lib/dal";
+import { auth } from "@/lib/auth";
 
 export default async function HomePage() {
   const courses = await getAllCourses();
+  const session = await auth();
+
+  const totalLessons = courses.reduce((a, c) => a + c._count.lessons, 0);
+  const totalSessions = courses.reduce((a, c) => a + c._count.videoSessions, 0);
 
   return (
-    <div className="mx-auto max-w-5xl px-4">
-      <section className="relative overflow-hidden py-20 sm:py-28">
-        <div className="absolute -top-40 right-0 -z-10 size-[500px] rounded-full bg-gradient-to-br from-indigo-100/60 via-transparent to-violet-100/60 blur-3xl dark:from-indigo-900/20 dark:to-violet-900/20" />
-        <div className="absolute -bottom-40 left-0 -z-10 size-[400px] rounded-full bg-gradient-to-tr from-sky-100/40 via-transparent to-indigo-100/40 blur-3xl dark:from-sky-900/10 dark:to-indigo-900/10" />
-        <div className="mx-auto max-w-2xl text-center">
-          <div className="mb-6 inline-flex items-center gap-1.5 rounded-full border border-indigo-200/60 bg-indigo-50/80 px-4 py-1.5 text-sm font-medium text-indigo-700 dark:border-indigo-800/60 dark:bg-indigo-950/50 dark:text-indigo-300">
-            <span className="flex size-2 rounded-full bg-indigo-500" />
+    <div className="relative mx-auto max-w-5xl px-4">
+      <div className="fixed inset-0 -z-10 bg-cover bg-center bg-no-repeat" style={{ backgroundImage: "url(/hero-bg.jpg)" }} />
+
+      <section className="py-20 sm:py-28 lg:py-36">
+        <div className="mx-auto max-w-3xl text-center">
+          <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/10 px-4 py-1.5 text-sm font-medium text-white backdrop-blur-sm">
+            <span className="flex size-1.5 rounded-full bg-emerald-400" />
             Interactive learning platform
           </div>
-          <h1 className="text-4xl font-bold tracking-tight text-zinc-900 sm:text-5xl lg:text-6xl dark:text-zinc-100">
-            Learn{" "}
-            <span className="bg-gradient-to-r from-indigo-600 via-violet-500 to-purple-500 bg-clip-text text-transparent">
+
+          <h1 className="text-5xl font-bold tracking-tight text-white sm:text-6xl lg:text-7xl">
+            Master{" "}
+            <span className="bg-gradient-to-r from-indigo-300 via-violet-300 to-purple-300 bg-clip-text text-transparent">
               Web Development
             </span>
           </h1>
-          <p className="mt-6 text-lg leading-relaxed text-zinc-500 dark:text-zinc-400">
-            Master HTML, CSS, and JavaScript with interactive lessons, flashcards, and quizzes that
-            adapt to your pace.
+
+          <p className="mx-auto mt-6 max-w-xl text-lg leading-relaxed text-white/70">
+            Learn HTML, CSS, JavaScript, Python and more with interactive lessons, smart flashcards, and quizzes that adapt to your pace.
           </p>
-          <div className="mt-8 flex items-center justify-center gap-4">
-            <Link
-              href="/courses"
-              className="inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-indigo-600 to-violet-500 px-6 py-3 text-sm font-medium text-white shadow-sm transition-all hover:shadow-lg hover:brightness-110"
-            >
-              Browse Courses
-              <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" strokeWidth="2" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3" />
-              </svg>
-            </Link>
-            <Link
-              href="/login"
-              className="inline-flex items-center gap-2 rounded-xl border border-zinc-200/60 bg-white px-6 py-3 text-sm font-medium text-zinc-700 shadow-sm transition-all hover:bg-zinc-50 hover:shadow-md dark:border-zinc-700/60 dark:bg-zinc-900 dark:text-zinc-300 dark:hover:bg-zinc-800"
-            >
-              Get Started Free
-            </Link>
+
+          <div className="mt-8 flex flex-wrap items-center justify-center gap-4">
+            {session ? (
+              <>
+                <Link
+                  href="/dashboard"
+                  className="inline-flex items-center gap-2 rounded-xl bg-white px-6 py-3 text-sm font-semibold text-indigo-700 shadow-lg shadow-indigo-500/20 transition-all hover:shadow-xl hover:brightness-105"
+                >
+                  Go to Dashboard
+                  <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" strokeWidth="2" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3" />
+                  </svg>
+                </Link>
+                <Link
+                  href="/courses"
+                  className="inline-flex items-center gap-2 rounded-xl border border-white/30 px-6 py-3 text-sm font-semibold text-white transition-all hover:bg-white/10"
+                >
+                  Browse Courses
+                </Link>
+              </>
+            ) : (
+              <>
+                <Link
+                  href="/register"
+                  className="inline-flex items-center gap-2 rounded-xl bg-white px-6 py-3 text-sm font-semibold text-indigo-700 shadow-lg shadow-indigo-500/20 transition-all hover:shadow-xl hover:brightness-105"
+                >
+                  Create Account
+                  <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" strokeWidth="2" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3" />
+                  </svg>
+                </Link>
+                <Link
+                  href="/login"
+                  className="inline-flex items-center gap-2 rounded-xl border border-white/30 px-6 py-3 text-sm font-semibold text-white transition-all hover:bg-white/10"
+                >
+                  Sign In
+                </Link>
+              </>
+            )}
           </div>
+        </div>
+      </section>
+
+      <section className="py-16">
+        <div className="grid gap-6 sm:grid-cols-3">
+          {[
+            { value: courses.length, label: "Courses" },
+            { value: totalLessons, label: "Lessons" },
+            { value: totalSessions, label: "Video Sessions" },
+          ].map((stat, i) => (
+            <div
+              key={i}
+              className="rounded-2xl border border-white/10 bg-white/5 p-8 text-center backdrop-blur-sm"
+            >
+              <div className="text-5xl font-bold text-white">{stat.value}+</div>
+              <div className="mt-2 text-sm font-medium text-white/60">{stat.label}</div>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      <section className="py-16">
+        <div className="text-center">
+          <h2 className="text-3xl font-bold text-white">Everything you need to learn</h2>
+          <p className="mt-2 text-white/60">Interactive tools designed for effective learning.</p>
+        </div>
+        <div className="mt-12 grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
+          {[
+            {
+              title: "Interactive Lessons",
+              desc: "Hands-on coding exercises and real-world examples.",
+              icon: "M12 6.042A8.967 8.967 0 006 3.75c-1.052 0-2.062.18-3 .512v14.25A8.987 8.987 0 016 18c2.305 0 4.408.867 6 2.292m0-14.25a8.966 8.966 0 016-2.292c1.052 0 2.062.18 3 .512v14.25A8.987 8.987 0 0018 18a8.967 8.967 0 00-6 2.292m0-14.25v14.25",
+            },
+            {
+              title: "Smart Flashcards",
+              desc: "Flip cards to review and mark what you've mastered.",
+              icon: "M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z",
+            },
+            {
+              title: "Practice Quizzes",
+              desc: "Test your knowledge and track scores over time.",
+              icon: "M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z",
+            },
+            {
+              title: "Video Sessions",
+              desc: "Follow along with embedded video tutorials.",
+              icon: "M15.75 10.5l4.72-4.72a.75.75 0 011.28.53v11.38a.75.75 0 01-1.28.53l-4.72-4.72M4.5 18.75h9a2.25 2.25 0 002.25-2.25v-9a2.25 2.25 0 00-2.25-2.25h-9A2.25 2.25 0 002.25 7.5v9a2.25 2.25 0 002.25 2.25z",
+            },
+          ].map((feature, i) => (
+            <div
+              key={i}
+              className="group rounded-2xl border border-white/10 bg-white/5 p-6 backdrop-blur-sm transition-all duration-300 hover:border-white/20 hover:bg-white/10"
+            >
+              <div className="mb-4 flex size-10 items-center justify-center rounded-xl bg-white/10 text-white">
+                <svg className="size-5" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" d={feature.icon} />
+                </svg>
+              </div>
+              <h3 className="font-semibold text-white">{feature.title}</h3>
+              <p className="mt-1.5 text-sm leading-relaxed text-white/60">{feature.desc}</p>
+            </div>
+          ))}
         </div>
       </section>
 
       <section className="py-16">
         <div className="flex items-center justify-between">
           <div>
-            <h2 className="text-2xl font-bold text-zinc-900 dark:text-zinc-100">Available Courses</h2>
-            <p className="mt-1 text-sm text-zinc-500 dark:text-zinc-400">Start your learning journey today.</p>
+            <h2 className="text-3xl font-bold text-white">Available Courses</h2>
+            <p className="mt-1 text-white/60">Start your learning journey today.</p>
           </div>
-            <Link
-              href="/courses"
-              className="hidden items-center gap-1 text-sm font-medium text-indigo-600 transition-colors hover:text-indigo-500 sm:flex dark:text-indigo-400 dark:hover:text-indigo-300"
+          <Link
+            href="/courses"
+            className="hidden items-center gap-1 text-sm font-medium text-white/70 transition-colors hover:text-white sm:flex"
           >
             View all
             <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" strokeWidth="2" stroke="currentColor">
@@ -61,49 +152,95 @@ export default async function HomePage() {
           </Link>
         </div>
         <div className="mt-8 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-          {courses.map((course) => (
+          {courses.slice(0, 6).map((course) => (
             <Link
               key={course.id}
               href={`/courses/${course.slug}`}
-              className="group relative block overflow-hidden rounded-2xl border border-zinc-200/60 bg-white p-6 shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-lg dark:border-zinc-700/60 dark:bg-zinc-900 dark:hover:shadow-zinc-800/50"
+              className="group rounded-2xl border border-white/10 bg-white/5 p-6 backdrop-blur-sm transition-all duration-300 hover:border-white/20 hover:bg-white/10"
             >
-              <div className="mb-4 h-2 w-12 rounded-full bg-gradient-to-r from-indigo-500 to-violet-500" />
-              <h3 className="text-lg font-semibold text-zinc-900 transition-colors group-hover:text-indigo-600 dark:text-zinc-100 dark:group-hover:text-indigo-400">
-                {course.title}
-              </h3>
-              <p className="mt-2 text-sm leading-relaxed text-zinc-500 line-clamp-2 dark:text-zinc-400">
-                {course.description}
-              </p>
-              <p className="mt-5 text-xs font-medium text-zinc-400 dark:text-zinc-500">
-                {course._count.lessons} lessons{course._count.videoSessions > 0 ? ` · ${course._count.videoSessions} sessions` : ""}
-              </p>
+              <div className="mb-4 flex items-center gap-3">
+                <div className="flex size-10 items-center justify-center rounded-xl bg-gradient-to-br from-indigo-400 to-violet-400 text-lg font-bold text-white shadow-sm">
+                  {course.title[0]}
+                </div>
+                <div className="h-1.5 flex-1 rounded-full bg-white/10">
+                  <div className="h-full w-0 rounded-full bg-gradient-to-r from-indigo-400 to-violet-400 transition-all duration-700 group-hover:w-1/3" />
+                </div>
+              </div>
+              <h3 className="font-semibold text-white transition-colors group-hover:text-indigo-300">{course.title}</h3>
+              <p className="mt-2 text-sm leading-relaxed text-white/60 line-clamp-2">{course.description}</p>
+              <div className="mt-5 flex items-center gap-4 text-xs font-medium text-white/50">
+                <span className="flex items-center gap-1">
+                  <svg className="size-3.5" fill="none" viewBox="0 0 24 24" strokeWidth="2" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M12 6.042A8.967 8.967 0 006 3.75c-1.052 0-2.062.18-3 .512v14.25A8.987 8.987 0 016 18c2.305 0 4.408.867 6 2.292m0-14.25a8.966 8.966 0 016-2.292c1.052 0 2.062.18 3 .512v14.25A8.987 8.987 0 0018 18a8.967 8.967 0 00-6 2.292m0-14.25v14.25" />
+                  </svg>
+                  {course._count.lessons} lessons
+                </span>
+                {course._count.videoSessions > 0 && (
+                  <span className="flex items-center gap-1">
+                    <svg className="size-3.5" fill="none" viewBox="0 0 24 24" strokeWidth="2" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 10.5l4.72-4.72a.75.75 0 011.28.53v11.38a.75.75 0 01-1.28.53l-4.72-4.72M4.5 18.75h9a2.25 2.25 0 002.25-2.25v-9a2.25 2.25 0 00-2.25-2.25h-9A2.25 2.25 0 002.25 7.5v9a2.25 2.25 0 002.25 2.25z" />
+                    </svg>
+                    {course._count.videoSessions} sessions
+                  </span>
+                )}
+              </div>
             </Link>
           ))}
         </div>
+        {courses.length > 6 && (
+          <div className="mt-8 text-center">
+            <Link
+              href="/courses"
+              className="inline-flex items-center gap-2 rounded-xl border border-white/20 bg-white/10 px-5 py-2.5 text-sm font-medium text-white backdrop-blur-sm transition-all hover:bg-white/20"
+            >
+              View All {courses.length} Courses
+            </Link>
+          </div>
+        )}
       </section>
 
-      <section className="border-t border-zinc-200/60 py-16 dark:border-zinc-800/60">
-        <div className="mx-auto grid gap-8 sm:grid-cols-3">
-          <div className="rounded-2xl border border-zinc-200/60 bg-white p-6 text-center shadow-sm dark:border-zinc-700/60 dark:bg-zinc-900">
-            <div className="text-3xl font-bold bg-gradient-to-r from-indigo-500 to-violet-500 bg-clip-text text-transparent">
-              4
-            </div>
-            <div className="mt-2 text-sm font-medium text-zinc-500 dark:text-zinc-400">Courses</div>
-          </div>
-          <div className="rounded-2xl border border-zinc-200/60 bg-white p-6 text-center shadow-sm dark:border-zinc-700/60 dark:bg-zinc-900">
-            <div className="text-3xl font-bold bg-gradient-to-r from-indigo-500 to-violet-500 bg-clip-text text-transparent">
-              9+
-            </div>
-            <div className="mt-2 text-sm font-medium text-zinc-500 dark:text-zinc-400">Lessons</div>
-          </div>
-          <div className="rounded-2xl border border-zinc-200/60 bg-white p-6 text-center shadow-sm dark:border-zinc-700/60 dark:bg-zinc-900">
-            <div className="text-3xl font-bold bg-gradient-to-r from-indigo-500 to-violet-500 bg-clip-text text-transparent">
-              2
-            </div>
-            <div className="mt-2 text-sm font-medium text-zinc-500 dark:text-zinc-400">Video Sessions</div>
+      <section className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-indigo-500/90 via-violet-500/90 to-purple-500/90 px-8 py-16 text-center text-white backdrop-blur-sm">
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,rgba(255,255,255,0.15),transparent_50%)]" />
+        <div className="relative">
+          <h2 className="text-3xl font-bold sm:text-4xl">Ready to start learning?</h2>
+          <p className="mx-auto mt-3 max-w-lg text-base text-white/70">
+            Join thousands of learners mastering web development with interactive tools and real-world projects.
+          </p>
+          <div className="mt-8 flex flex-wrap items-center justify-center gap-4">
+            {session ? (
+              <Link
+                href="/dashboard"
+                className="inline-flex items-center gap-2 rounded-xl bg-white px-6 py-3 text-sm font-semibold text-indigo-700 shadow-lg shadow-indigo-500/20 transition-all hover:shadow-xl"
+              >
+                Go to Dashboard
+                <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" strokeWidth="2" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3" />
+                </svg>
+              </Link>
+            ) : (
+              <Link
+                href="/register"
+                className="inline-flex items-center gap-2 rounded-xl bg-white px-6 py-3 text-sm font-semibold text-indigo-700 shadow-lg shadow-indigo-500/20 transition-all hover:shadow-xl"
+              >
+                Create Free Account
+                <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" strokeWidth="2" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3" />
+                </svg>
+              </Link>
+            )}
+            <Link
+              href="/courses"
+              className="inline-flex items-center gap-2 rounded-xl border border-white/30 px-6 py-3 text-sm font-semibold text-white transition-all hover:bg-white/10"
+            >
+              {session ? "Continue Learning" : "Explore Courses"}
+            </Link>
           </div>
         </div>
       </section>
+
+      <footer className="py-12 text-center text-sm text-white/40">
+        <p>&copy; {new Date().getFullYear()} DevLearn. All rights reserved.</p>
+      </footer>
     </div>
   );
 }
